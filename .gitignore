@@ -1,2 +1,12 @@
+# ignore files ignored in all branches
+
+# java_server
 **/target/
 src/main/proto
+
+# flutter_app
+flutter_app/proto
+flutter_app/lib/src/generated
+
+# vscode
+.vscode/
