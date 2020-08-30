@@ -1,0 +1,1 @@
+ mvn -DskipTests package exec:java -Dexec.mainClass=com.example.grpc.Client
