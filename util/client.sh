@@ -1,1 +1,4 @@
-mvn -DskipTests package exec:java -Dexec.mainClass=com.example.grpc.Client
+(
+    cd java_server
+    mvn -DskipTests package exec:java -Dexec.mainClass=com.example.grpc.Client
+)

@@ -1,1 +1,4 @@
-mvn -DskipTests package
+(
+    cd java_server
+    mvn -DskipTests package
+)
