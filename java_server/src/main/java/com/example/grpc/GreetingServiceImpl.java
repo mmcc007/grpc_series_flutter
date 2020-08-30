@@ -12,6 +12,7 @@ import org.bson.Document;
 
 import io.grpc.stub.StreamObserver;
 
+// https://codelabs.developers.google.com/codelabs/cloud-grpc-java
 public class GreetingServiceImpl extends GreetingServiceGrpc.GreetingServiceImplBase {
   @Override
   public void greeting(GreetingServiceOuterClass.HelloRequest request,

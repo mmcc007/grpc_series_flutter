@@ -4,6 +4,7 @@ import io.grpc.*;
 // New import
 import io.grpc.stub.*;
 
+// https://codelabs.developers.google.com/codelabs/cloud-grpc-java/#0
 public class Client {
   public static void main(String[] args) throws Exception {
     final ManagedChannel channel = ManagedChannelBuilder.forTarget("localhost:8080").usePlaintext(true).build();
@@ -34,13 +35,9 @@ public class Client {
     });
 
     // list the MongoDB databases
+    // https://www.mongodb.com/blog/post/quick-start-java-and-mongodb--starting-and-setup?utm_campaign=javaquickstart
     GreetingServiceOuterClass.ListDbRequest listDatabasesRequest = GreetingServiceOuterClass.ListDbRequest.newBuilder()
         .build();
-
-    // Finally, make the call using the stub
-    // GreetingServiceOuterClass.ListDbResponse response =
-    // stub.listDatabases(listDatabasesRequest);
-    // stub.listDatabases(request, responseObserver);
 
     stub.listDatabases(listDatabasesRequest, new StreamObserver<GreetingServiceOuterClass.ListDbResponse>() {
       public void onNext(GreetingServiceOuterClass.ListDbResponse response) {
