@@ -16,20 +16,20 @@ class Client {
   }
 
   Future<String> getGreeting(String name) async {
-    // return the last streamed greeting
-    String greeting;
-
     try {
       final request = HelloRequest();
       request.name = name;
-      await for (var response in stub.greeting(request)) {
-        print(response);
-        greeting = response.greeting;
-      }
+      final response = await stub.greeting(request);
+      return response.greeting;
     } catch (e) {
       print('Caught error: $e');
     }
-    return greeting;
+    return null;
+  }
+
+  Future<List<String>> listDatabases() async {
+    final response = await stub.listDatabases(ListDbRequest());
+    return response.database;
   }
 
   Future<void> close() async {

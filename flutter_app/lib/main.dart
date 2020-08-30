@@ -52,12 +52,11 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
-  Client client =
-      Client(server: '<ip address of java grpc server (not 127.0.0.1)>');
-  String _greeting = '';
+  Client client = Client(server: '192.168.0.254');
+  String _firstDatabase = '';
 
   Future<void> _incrementCounter() async {
-    _greeting = await client.getGreeting('counter');
+    _firstDatabase = (await client.listDatabases())[0];
     setState(() {
       // This call to setState tells the Flutter framework that something has
       // changed in this State, which causes it to rerun the build method below
@@ -110,7 +109,7 @@ class _MyHomePageState extends State<MyHomePage> {
               style: Theme.of(context).textTheme.headline4,
             ),
             Text(
-              '$_greeting',
+              '$_firstDatabase',
               style: Theme.of(context).textTheme.headline4,
             ),
           ],
