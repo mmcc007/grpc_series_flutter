@@ -21,5 +21,10 @@ message HelloResponse { string greeting = 1; }
 // Defining a Service, a Service can have multiple RPC operations
 service GreetingService {
   // Define a RPC operation
-  rpc greeting(HelloRequest) returns (stream HelloResponse);
+  rpc greeting(HelloRequest) returns (HelloResponse);
+  rpc listDatabases(ListDbRequest) returns (ListDbResponse);
 }
+
+message ListDbRequest {}
+
+message ListDbResponse { repeated string database = 1; }
