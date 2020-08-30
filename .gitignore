@@ -2,7 +2,10 @@
 
 # java_server
 **/target/
-src/main/proto
+java_server/src/main/proto
+java_server/.idea/
+java_server/.settings/
+java_server/.project
 
 # flutter_app
 flutter_app/proto
