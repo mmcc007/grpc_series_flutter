@@ -1,5 +1,7 @@
 package com.example.grpc;
 
+import com.example.grpc.GreetingServiceOuterClass.LatLng;
+
 import io.grpc.*;
 // New import
 import io.grpc.stub.*;
@@ -51,9 +53,28 @@ public class Client {
         // Typically you'll shutdown the channel somewhere else.
         // But for the purpose of the lab, we are only making a single
         // request. We'll shutdown as soon as this request is done.
-        channel.shutdownNow();
+        // channel.shutdownNow();
       }
     });
 
+    GreetingServiceOuterClass.NeighborhoodRequest neighborhoodRequest = GreetingServiceOuterClass.NeighborhoodRequest
+        .newBuilder().build();
+    stub.getNeighborhood(neighborhoodRequest, new StreamObserver<GreetingServiceOuterClass.NeighborhoodResponse>() {
+      public void onNext(GreetingServiceOuterClass.NeighborhoodResponse response) {
+        for (LatLng point : response.getPolygonList()) {
+          System.out.println(point);
+        }
+      }
+
+      public void onError(Throwable t) {
+      }
+
+      public void onCompleted() {
+        // Typically you'll shutdown the channel somewhere else.
+        // But for the purpose of the lab, we are only making a single
+        // request. We'll shutdown as soon as this request is done.
+        channel.shutdownNow();
+      }
+    });
   }
 }
