@@ -23,8 +23,18 @@ service GreetingService {
   // Define a RPC operation
   rpc greeting(HelloRequest) returns (HelloResponse);
   rpc listDatabases(ListDbRequest) returns (ListDbResponse);
+  rpc getNeighborhood(NeighborhoodRequest) returns (NeighborhoodResponse);
 }
 
 message ListDbRequest {}
 
 message ListDbResponse { repeated string database = 1; }
+
+message NeighborhoodRequest { string name = 1; }
+
+message LatLng {
+  string latitude = 1;
+  string longitude = 2;
+}
+
+message NeighborhoodResponse { repeated LatLng polygon = 1; }
