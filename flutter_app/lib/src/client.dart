@@ -32,7 +32,22 @@ class Client {
     return response.database;
   }
 
+  Future<List<LatLng>> getNeighborhood(String name) async {
+    final request = NeighborhoodRequest();
+    request.name = name;
+    final response = await stub.getNeighborhood(request);
+    return response.polygon;
+  }
+
   Future<void> close() async {
     await channel.shutdown();
+  }
+
+  Future<bool> isInPolygon(LatLng latLng, String polygonName) async {
+    final request = IsInPolygonRequest();
+    request.point = latLng;
+    request.polygonName = polygonName;
+    final response = await stub.isInPolygon(request);
+    return response.isInPolygon;
   }
 }
