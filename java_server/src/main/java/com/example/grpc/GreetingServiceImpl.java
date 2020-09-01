@@ -3,14 +3,24 @@ package com.example.grpc;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import com.example.grpc.GreetingServiceOuterClass.IsInPolygonRequest;
+import com.example.grpc.GreetingServiceOuterClass.IsInPolygonResponse;
 import com.example.grpc.GreetingServiceOuterClass.LatLng;
+import com.example.grpc.GreetingServiceOuterClass.ListDbRequest;
 import com.example.grpc.GreetingServiceOuterClass.ListDbResponse;
+import com.example.grpc.GreetingServiceOuterClass.NeighborhoodRequest;
 import com.example.grpc.GreetingServiceOuterClass.NeighborhoodResponse;
+import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.geojson.GeoJsonObjectType;
+import com.mongodb.client.model.geojson.Point;
+import com.mongodb.client.model.geojson.Position;
 
 import org.bson.Document;
 
@@ -18,6 +28,7 @@ import io.grpc.stub.StreamObserver;
 
 // https://codelabs.developers.google.com/codelabs/cloud-grpc-java
 public class GreetingServiceImpl extends GreetingServiceGrpc.GreetingServiceImplBase {
+
         @Override
         public void greeting(GreetingServiceOuterClass.HelloRequest request,
                         StreamObserver<GreetingServiceOuterClass.HelloResponse> responseObserver) {
@@ -39,8 +50,7 @@ public class GreetingServiceImpl extends GreetingServiceGrpc.GreetingServiceImpl
 
         // https://www.mongodb.com/blog/post/quick-start-java-and-mongodb--starting-and-setup?utm_campaign=javaquickstart
         @Override
-        public void listDatabases(GreetingServiceOuterClass.ListDbRequest request,
-                        StreamObserver<GreetingServiceOuterClass.ListDbResponse> responseObserver) {
+        public void listDatabases(ListDbRequest request, StreamObserver<ListDbResponse> responseObserver) {
                 String connectionString = System.getProperty("mongodb.uri");
                 try (MongoClient mongoClient = MongoClients.create(connectionString)) {
                         List<Document> databases = mongoClient.listDatabases().into(new ArrayList<>());
@@ -50,12 +60,14 @@ public class GreetingServiceImpl extends GreetingServiceGrpc.GreetingServiceImpl
                                         .addAllDatabase(databasesStrList).build();
                         responseObserver.onNext(response);
                         responseObserver.onCompleted();
+                } catch (Exception e) {
+                        e.printStackTrace(System.err);
                 }
         }
 
         @Override
-        public void getNeighborhood(GreetingServiceOuterClass.NeighborhoodRequest request,
-                        StreamObserver<GreetingServiceOuterClass.NeighborhoodResponse> responseObserver) {
+        public void getNeighborhood(NeighborhoodRequest request,
+                        StreamObserver<NeighborhoodResponse> responseObserver) {
 
                 String connectionString = System.getProperty("mongodb.uri");
                 try (MongoClient mongoClient = MongoClients.create(connectionString)) {
@@ -81,6 +93,44 @@ public class GreetingServiceImpl extends GreetingServiceGrpc.GreetingServiceImpl
                         e.printStackTrace(System.err);
                 }
 
+        }
+
+        @Override
+        public void isInPolygon(IsInPolygonRequest request, StreamObserver<IsInPolygonResponse> responseObserver) {
+                boolean isInPolygon = false;
+                String polygonName = request.getPolygonName();
+                LatLng point = request.getPoint();
+                List<Double> p = Stream
+                                .of(Double.parseDouble(point.getLongitude()), Double.parseDouble(point.getLatitude()))
+                                .collect(Collectors.toList());
+                Position position = new Position(p);
+                Point spot = new Point(position);
+                // // BSon bson = Bson
+
+                // FindIterable<org.bson.Document> result =
+                // collection.find(Filters.geoIntersects("geometry", (Bson) cleanedCoords));
+
+                String connectionString = System.getProperty("mongodb.uri");
+                try (MongoClient mongoClient = MongoClients.create(connectionString)) {
+                        MongoDatabase db = mongoClient.getDatabase("sample_restaurants");
+                        FindIterable<Document> collection = db.getCollection("neighborhoods").find(Filters
+                                        .and(Filters.eq("name", polygonName), Filters.geoIntersects("geometry", spot)));
+                        // FindIterable<Document> collection = db.getCollection("neighborhoods")
+                        // .find(Filters.and(Filters.eq("name", polygonName)));
+                        Document neighborhood = collection.first();
+                        if (neighborhood != null && !neighborhood.isEmpty())
+                                isInPolygon = true;
+
+                        // FindIterable result = collection.find(Filters.geoIntersects("geometry",
+                        // point));
+
+                        IsInPolygonResponse response = IsInPolygonResponse.newBuilder().setIsInPolygon(isInPolygon)
+                                        .build();
+                        responseObserver.onNext(response);
+                        responseObserver.onCompleted();
+                } catch (Exception e) {
+                        e.printStackTrace(System.err);
+                }
         }
 
 }
