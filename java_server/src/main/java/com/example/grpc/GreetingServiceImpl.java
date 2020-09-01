@@ -15,10 +15,8 @@ import com.example.grpc.GreetingServiceOuterClass.NeighborhoodResponse;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
-import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
-import com.mongodb.client.model.geojson.GeoJsonObjectType;
 import com.mongodb.client.model.geojson.Point;
 import com.mongodb.client.model.geojson.Position;
 
@@ -69,27 +67,37 @@ public class GreetingServiceImpl extends GreetingServiceGrpc.GreetingServiceImpl
         public void getNeighborhood(NeighborhoodRequest request,
                         StreamObserver<NeighborhoodResponse> responseObserver) {
 
+                String name = request.getName();
+
                 String connectionString = System.getProperty("mongodb.uri");
                 try (MongoClient mongoClient = MongoClients.create(connectionString)) {
                         MongoDatabase db = mongoClient.getDatabase("sample_restaurants");
-                        MongoCollection<Document> collection = db.getCollection("neighborhoods");
-                        Document neighborhood = collection.find().first();
-                        // for (Map.Entry<String, Object> entry : neighborhood.entrySet()) {
-                        // System.out.println("Key: " + entry.getKey() + " Value: " + entry.getValue());
-                        // }
-                        Document geometry = (Document) neighborhood.get("geometry");
-                        @SuppressWarnings("unchecked")
-                        List<List<List<Double>>> coordinates = (List<List<List<Double>>>) geometry.get("coordinates");
-                        List<LatLng> polygon = coordinates.get(0).stream()
-                                        .map(coords -> LatLng.newBuilder().setLatitude(coords.get(1).toString())
-                                                        .setLongitude(coords.get(0).toString()).build())
-                                        .collect(Collectors.toList());
-                        NeighborhoodResponse response = GreetingServiceOuterClass.NeighborhoodResponse.newBuilder()
-                                        .addAllPolygon(polygon).build();
-                        responseObserver.onNext(response);
+                        FindIterable<Document> collection = db.getCollection("neighborhoods")
+                                        .find(Filters.eq("name", name));
+                        Document neighborhood = collection.first();
+                        if (neighborhood != null && !neighborhood.isEmpty()) {
+                                // for (Map.Entry<String, Object> entry : neighborhood.entrySet()) {
+                                // System.out.println("Key: " + entry.getKey() + " Value: " + entry.getValue());
+                                // }
+                                Document geometry = (Document) neighborhood.get("geometry");
+                                @SuppressWarnings("unchecked")
+                                List<List<List<Double>>> coordinates = (List<List<List<Double>>>) geometry
+                                                .get("coordinates");
+                                List<LatLng> polygon = coordinates.get(0).stream()
+                                                .map(coords -> LatLng.newBuilder().setLatitude(coords.get(1).toString())
+                                                                .setLongitude(coords.get(0).toString()).build())
+                                                .collect(Collectors.toList());
+                                NeighborhoodResponse response = GreetingServiceOuterClass.NeighborhoodResponse
+                                                .newBuilder().addAllPolygon(polygon).build();
+                                responseObserver.onNext(response);
+                        } else {
+                                NeighborhoodResponse response = GreetingServiceOuterClass.NeighborhoodResponse
+                                                .newBuilder().build();
+                                responseObserver.onNext(response);
+                        }
                         responseObserver.onCompleted();
+
                 } catch (Exception e) {
-                        System.out.println(e);
                         e.printStackTrace(System.err);
                 }
 
@@ -105,24 +113,15 @@ public class GreetingServiceImpl extends GreetingServiceGrpc.GreetingServiceImpl
                                 .collect(Collectors.toList());
                 Position position = new Position(p);
                 Point spot = new Point(position);
-                // // BSon bson = Bson
-
-                // FindIterable<org.bson.Document> result =
-                // collection.find(Filters.geoIntersects("geometry", (Bson) cleanedCoords));
 
                 String connectionString = System.getProperty("mongodb.uri");
                 try (MongoClient mongoClient = MongoClients.create(connectionString)) {
                         MongoDatabase db = mongoClient.getDatabase("sample_restaurants");
                         FindIterable<Document> collection = db.getCollection("neighborhoods").find(Filters
                                         .and(Filters.eq("name", polygonName), Filters.geoIntersects("geometry", spot)));
-                        // FindIterable<Document> collection = db.getCollection("neighborhoods")
-                        // .find(Filters.and(Filters.eq("name", polygonName)));
                         Document neighborhood = collection.first();
                         if (neighborhood != null && !neighborhood.isEmpty())
                                 isInPolygon = true;
-
-                        // FindIterable result = collection.find(Filters.geoIntersects("geometry",
-                        // point));
 
                         IsInPolygonResponse response = IsInPolygonResponse.newBuilder().setIsInPolygon(isInPolygon)
                                         .build();
