@@ -1,0 +1,18 @@
+# files ignored by this branch (including other branches that may have been checkedout)
+
+# java_server
+java_server/target/
+java_server/src/main/proto
+
+# flutter_app
+flutter_app/
+
+# vscode
+.vscode/
+
+# idea
+.idea/
+
+# eclipse
+.settings/
+.project

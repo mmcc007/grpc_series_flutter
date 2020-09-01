@@ -1,0 +1,1 @@
+mvn -DskipTests package exec:java -Dexec.mainClass=com.example.grpc.App -Dmongodb.uri="mongodb+srv://<username>:<password@<host>/<database name>?retryWrites=true&w=majority"
