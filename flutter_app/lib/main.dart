@@ -27,10 +27,11 @@ class MapSampleState extends State<MapSample> {
   Client client = Client(server: '192.168.0.254');
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
   Set<Polygon> _polygons = {};
+  final _neighborhood = 'Midtown-Midtown South';
 
   static final CameraPosition _kNeighborhood = CameraPosition(
-    target: LatLng(40.69285833429998, -73.9495425671339),
-    zoom: 14.4746,
+    target: LatLng(40.7550, -73.9835),
+    zoom: 14,
   );
 
   @override
@@ -55,7 +56,7 @@ class MapSampleState extends State<MapSample> {
   }
 
   _showNeighborhood() async {
-    final result = await client.getNeighborhood('Bedford');
+    final result = await client.getNeighborhood(_neighborhood);
     final points = result.map((e) => cnvLagLngGrpcToMap(e)).toList();
     print(points);
     _polygons = {
@@ -74,7 +75,7 @@ class MapSampleState extends State<MapSample> {
   _tapMap(LatLng latLng) async {
     print(latLng);
     final isInPolygon =
-        await client.isInPolygon(cnvLatLngMapToGrpc(latLng), 'Bedford');
+        await client.isInPolygon(cnvLatLngMapToGrpc(latLng), _neighborhood);
     String message;
     if (isInPolygon)
       message = '$latLng is in neighborhood';
