@@ -24,6 +24,7 @@ service GreetingService {
   rpc greeting(HelloRequest) returns (HelloResponse);
   rpc listDatabases(ListDbRequest) returns (ListDbResponse);
   rpc getNeighborhood(NeighborhoodRequest) returns (NeighborhoodResponse);
+  rpc isInPolygon(IsInPolygonRequest) returns (IsInPolygonResponse);
 }
 
 message ListDbRequest {}
@@ -38,3 +39,10 @@ message LatLng {
 }
 
 message NeighborhoodResponse { repeated LatLng polygon = 1; }
+
+message IsInPolygonRequest {
+  LatLng point = 1;
+  string polygon_name = 2;
+}
+
+message IsInPolygonResponse { bool isInPolygon = 1; }
