@@ -64,8 +64,7 @@ public class Client {
       }
     });
 
-    NeighborhoodRequest neighborhoodRequest = NeighborhoodRequest.newBuilder()
-        .setName("Battery Park City-Lower Manhattan").build();
+    NeighborhoodRequest neighborhoodRequest = NeighborhoodRequest.newBuilder().setName("Midtown-Midtown South").build();
     stub.getNeighborhood(neighborhoodRequest, new StreamObserver<NeighborhoodResponse>() {
       public void onNext(NeighborhoodResponse response) {
         for (LatLng point : response.getPolygonList()) {
